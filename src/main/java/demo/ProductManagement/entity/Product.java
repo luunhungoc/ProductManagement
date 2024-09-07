@@ -1,8 +1,6 @@
 package demo.ProductManagement.entity;
 
-import jakarta.persistence.*;
-
-
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -11,7 +9,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(name="name")
     private String name;
@@ -29,11 +27,11 @@ public class Product {
     private List<OrderDetailEntity> orderDetailEntityList;
     public Product(){}
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -58,11 +56,6 @@ public class Product {
         return photo;
     }
 
-//    @Transient
-//    public String getPhotosImagePath() {
-//        if (photos == null || id == 0) return null;
-//        return "/product-photos/" + id + "/" + photos;
-//    }
 
     public double getUnitPrice() {
         return unitPrice;

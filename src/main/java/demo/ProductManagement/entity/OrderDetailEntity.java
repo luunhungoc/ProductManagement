@@ -1,7 +1,7 @@
 package demo.ProductManagement.entity;
 
-import jakarta.persistence.*;
 
+import javax.persistence.*;
 
 @Entity
 @Table(name="orderDetails")
@@ -9,7 +9,7 @@ public class OrderDetailEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    private Long id;
+    private int id;
 
     @Column(name="quantity")
     private int quantity;
@@ -24,7 +24,7 @@ public class OrderDetailEntity {
 
     public OrderDetailEntity(){}
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
@@ -36,7 +36,7 @@ public class OrderDetailEntity {
         this.product = product;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

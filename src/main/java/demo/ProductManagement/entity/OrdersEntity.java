@@ -1,8 +1,8 @@
 package demo.ProductManagement.entity;
 
-import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,7 +12,7 @@ public class OrdersEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    private Long id;
+    private int id;
 
     @Column(name="orderDate")
     @DateTimeFormat(pattern ="yyyy-MM-dd")
@@ -29,11 +29,11 @@ public class OrdersEntity {
     public OrdersEntity(){}
 
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

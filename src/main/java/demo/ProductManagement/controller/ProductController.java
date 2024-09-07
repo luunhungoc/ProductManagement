@@ -1,43 +1,42 @@
 package demo.ProductManagement.controller;
 
-
-import demo.ProductManagement.entity.FileUploadUtil;
 import demo.ProductManagement.entity.Product;
+import demo.ProductManagement.entity.ProductService;
+import demo.ProductManagement.entity.Role;
+import demo.ProductManagement.entity.User;
 import demo.ProductManagement.repository.ProductRepository;
-import jakarta.persistence.criteria.Path;
-import jakarta.servlet.http.HttpServletRequest;
+import demo.ProductManagement.repository.RoleRepository;
+import demo.ProductManagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 public class ProductController {
-    public ProductController() {
-    }
+
     @Autowired
     private ProductRepository productRepository;
 
-    @GetMapping("/")
-    public String home() {
-        return "user/index";
-    }
+    @Autowired
+    private ProductService productService;
 
     @GetMapping("/product")
-    public String showProductList(Model model) {
-        List<Product> productList = new ArrayList<>((Collection<Product>) productRepository.findAll());
-        model.addAttribute("productList", productList);
+    public String listProducts(Model model,
+                               @RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "3") int size) {
+        Page<Product> productList = productService.getProducts(page, size);
+        System.out.println(productList.getNumber());
+        model.addAttribute("productList",productList);
         return "product/products";
     }
 
@@ -47,28 +46,21 @@ public class ProductController {
         return "product/add-product";
     }
 
-    @PostMapping("/product/add-product")
-    public String addProduct(@ModelAttribute Product product,
-                             @RequestParam("img") MultipartFile[] multipartFile) throws IOException {
-        String saveDirectory = "D:/static/photos/";
-        if (multipartFile != null && multipartFile.length > 0) {
-            for (MultipartFile aFile : multipartFile){
+    public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/src/main/resources/static/uploads";
 
-                System.out.println("Saving file: " + aFile.getOriginalFilename());
+    @PostMapping("/product/add-product") public String uploadImage(@ModelAttribute Product product, @RequestParam("image") MultipartFile file) throws IOException, IOException {
+        StringBuilder fileNames = new StringBuilder();
+        Path fileNameAndPath = Paths.get(UPLOAD_DIRECTORY, file.getOriginalFilename());
+        fileNames.append(file.getOriginalFilename());
+        Files.write(fileNameAndPath, file.getBytes());
+        product.setPhoto(fileNames.toString());
+        productRepository.save(product);
+        System.out.println(fileNames);
+        System.out.println(fileNameAndPath);
 
-                if (!aFile.getOriginalFilename().equals("")) {
-                    aFile.transferTo(new File(saveDirectory + aFile.getOriginalFilename()));
-                    String fileName = StringUtils.cleanPath(aFile.getOriginalFilename());
-                    product.setPhoto(fileName);
-                    System.out.println(saveDirectory+fileName);
-                }
-            }
-        }
-
-        Product savedProduct = productRepository.save(product);
         return "redirect:/product";
-
     }
+
 
     @GetMapping("/product/edit/{id}")
     public String editProductForm(@PathVariable int id, Model model) {
@@ -78,7 +70,7 @@ public class ProductController {
     }
 
     @PostMapping("/product/edit/{id}")
-    public String editProduct(@PathVariable Long id, @ModelAttribute Product product) {
+    public String editProduct(@PathVariable int id, @ModelAttribute Product product) {
         product.setId(id);
         productRepository.save(product);
         return "redirect:/product";
@@ -91,17 +83,19 @@ public class ProductController {
     }
 
     @GetMapping(value = "/search")
-    public String search(@RequestParam("searchInput") String searchInput, Model model) {
-        List<Product> resultList;
+    public String search(@RequestParam("searchInput") String searchInput, Model model,
+                         @RequestParam(defaultValue = "0") int page,
+                         @RequestParam(defaultValue = "3") int size) {
+        Page<Product> resultList;
         if (searchInput.isEmpty()) {
-            resultList = (List<Product>) productRepository.findAll();
+            resultList = productService.getProducts(page, size);
         } else {
-            resultList = productRepository.findByNameContainingOrId(searchInput, Long.valueOf(searchInput));
+            resultList = productService.getProductsByIdOrName(searchInput, Integer.parseInt(searchInput),page,size);
         }
         model.addAttribute("productList", resultList);
         return "product/products";
-
-
     }
+
+
 
 }

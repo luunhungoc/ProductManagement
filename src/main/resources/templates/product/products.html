@@ -1,27 +1,53 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
-     <title>List Products</title>
+    <meta charset="ISO-8859-1">
+    <title>List Products</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
- </head>
+</head>
 <body>
 <div th:replace="header :: header"></div>
 
-<div class="container text-center">
+<div style="margin-top: 80px;" class="container text-center">
+    <div sec:authorize="isAuthenticated()">
+        Welcome <b><span sec:authentication="name">Username</span></b>
+        &nbsp;
+        <i><span sec:authentication="principal.authorities">Roles</span></i>
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Logout"/>
+    </form>
     <div class="row">
 
         <form th:action="@{/search}" class="form-inline my-2 my-lg-0">
-            <input name="searchInput" type="text" class="form-control mr-sm-2" placeholder="Search by name or Id..." >
+            <input name="searchInput" type="text" class="form-control mr-sm-2" placeholder="Search by name or Id...">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
     </div>
     <div>
         <h1>List of Products</h1>
     </div>
-    <div>
-        <a th:href="@{/product/add-product}">Add New Product</a>
+    <div sec:authorize="hasAnyAuthority('CREATOR', 'ADMIN')">
+        <a class="btn btn-primary" th:href="@{/product/add-product}">Add New Product</a>
     </div>
+    <div>
+        <span th:text="${productList.number+1}">Page Number</span> of
+        <span th:text="${productList.totalPages}">Total Pages</span>
+    </div>
+
+    <div>
+        <a class="btn btn-primary"
+           th:href="@{/product(page=${productList.number-1}, size=${productList.size})}"
+           th:if="${productList.hasPrevious()}">Previous</a>
+
+        <a class="btn btn-primary"
+           th:href="@{/product(page=${productList.number+1}, size=${productList.size})}"
+           th:if="${productList.hasNext()}">Next</a>
+    </div>
+
     <div>
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
@@ -31,20 +57,23 @@
                 <th>Product Name</th>
                 <th>Product Description</th>
                 <th>Unit Price</th>
-                <th>Actions</th>
+                <th sec:authorize="hasAnyAuthority('ADMIN', 'EDITOR')">Actions</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:each="product: ${productList}">
+            <tr th:each="product: ${productList.content}">
 
-                <td><img style="width: 100px;" th:src="@{'/photos/' + ${product.photo}}"/></td>
+                <td><img style="width: 100px;" th:src="@{'/uploads/' + ${product.photo}}"/></td>
+
                 <td th:text="${product.id}">Product ID</td>
                 <td th:text="${product.name}">Product Name</td>
                 <td th:text="${product.description}">Product Description</td>
                 <td th:text="${product.unitPrice}">Unit Price</td>
-                <td>
+                <td sec:authorize="hasAnyAuthority('ADMIN', 'EDITOR')">
                     <a class="btn btn-secondary" th:href="@{/product/edit/{id}(id=${product.id})}">Edit</a>
-                    <a class="btn btn-danger" th:href="@{/product/delete/{id}(id=${product.id})}">Delete</a>
+                    <a sec:authorize="hasAuthority('ADMIN')" class="btn btn-danger"
+                       th:href="@{/product/delete/{id}(id=${product.id})}"
+                       onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
                 </td>
             </tr>
             </tbody>
