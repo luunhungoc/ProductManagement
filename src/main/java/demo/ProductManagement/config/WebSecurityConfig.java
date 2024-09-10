@@ -48,11 +48,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/").hasAnyAuthority("USER", "CREATOR", "EDITOR", "ADMIN")
                 .antMatchers("/product/add-product").hasAnyAuthority("ADMIN", "CREATOR")
                 .antMatchers("/product/edit/**").hasAnyAuthority("ADMIN", "EDITOR")
                 .antMatchers("/product/delete/**").hasAuthority("ADMIN")
-                .anyRequest().authenticated()
+                .antMatchers("/users").authenticated()
+                .antMatchers("/product/**").authenticated()
                 .and()
                 .formLogin()
                 .defaultSuccessUrl("/product")
