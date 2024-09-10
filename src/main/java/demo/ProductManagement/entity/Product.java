@@ -78,13 +78,5 @@ public class Product {
         this.orderDetailEntityList = orderDetailEntityList;
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-                "Id='" + id + '\'' +
-               "Name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                "unit price='" + unitPrice + '\'' +
-                '}';
-    }
+
 }
