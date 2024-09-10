@@ -1,0 +1,6 @@
+//create database ProductManagement;
+
+//INSERT INTO ProductManagement.roles VALUES (1,'USER');
+//INSERT INTO ProductManagement.roles VALUES (2,'CREATOR');
+//INSERT INTO ProductManagement.roles VALUES (3,'EDITOR');
+//INSERT INTO ProductManagement.roles VALUES (4,'ADMIN');
